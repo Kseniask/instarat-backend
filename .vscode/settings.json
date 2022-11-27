@@ -1,0 +1,37 @@
+{
+  "editor.renderControlCharacters": false,
+  "jest.autoEnable": false,
+  "jest.runAllTestsFirst": false,
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.jsxSingleQuote": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "terminal.integrated.scrollback": 3000,
+  "prettier.printWidth": 120,
+  "prettier.singleQuote": true,
+  "extensions.ignoreRecommendations": false,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.colorCustomizations": {
+    "editorUnnecessaryCode.border": "#DD7AAB"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "explorer.confirmDragAndDrop": false,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "files.eol": "auto",
+  "git.suggestSmartCommit": false
+}
