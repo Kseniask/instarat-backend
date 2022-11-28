@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
 import axios from 'axios'
 import { MediaGroup } from './interfaces';
+import fetch from "node-fetch";
 
 dotenv.config()
 
