@@ -22,7 +22,6 @@ app.get('/', (req, res) => {
 });
 app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
-    console.log('userId ', userId);
     if (!Number(userId)) {
         res.send('invalid');
         // userId = await getUserId(instaUsername, context)
@@ -31,52 +30,58 @@ app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0,
         // }
         //398693120
     }
-    const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`).then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }));
-    if (userStories && userStories.length !== 0) {
-        const mediaGroups = [];
-        userStories.forEach((story, index) => {
-            const isVideo = story.video_versions;
-            const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
-            const mediaValue = {
-                type: isVideo ? 'video' : 'photo',
-                media: storyUrl
-            };
-            if (index < 9) {
-                if (mediaGroups[0]) {
-                    mediaGroups[0].push(mediaValue);
+    try {
+        const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`).then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }));
+        if (userStories && userStories.length !== 0) {
+            const mediaGroups = [];
+            userStories.forEach((story, index) => {
+                const isVideo = story.video_versions;
+                const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
+                const mediaValue = {
+                    type: isVideo ? 'video' : 'photo',
+                    media: storyUrl
+                };
+                if (index < 9) {
+                    if (mediaGroups[0]) {
+                        mediaGroups[0].push(mediaValue);
+                    }
+                    else {
+                        mediaGroups.push([mediaValue]);
+                    }
+                }
+                else if (index < 19) {
+                    if (mediaGroups[1]) {
+                        mediaGroups[1].push(mediaValue);
+                    }
+                    else {
+                        mediaGroups.push([mediaValue]);
+                    }
+                }
+                else if (index < 29) {
+                    if (mediaGroups[2]) {
+                        mediaGroups[2].push(mediaValue);
+                    }
+                    else {
+                        mediaGroups.push([mediaValue]);
+                    }
                 }
                 else {
-                    mediaGroups.push([mediaValue]);
+                    if (mediaGroups[3]) {
+                        mediaGroups[3].push(mediaValue);
+                    }
+                    else {
+                        mediaGroups.push([mediaValue]);
+                    }
                 }
-            }
-            else if (index < 19) {
-                if (mediaGroups[1]) {
-                    mediaGroups[1].push(mediaValue);
-                }
-                else {
-                    mediaGroups.push([mediaValue]);
-                }
-            }
-            else if (index < 29) {
-                if (mediaGroups[2]) {
-                    mediaGroups[2].push(mediaValue);
-                }
-                else {
-                    mediaGroups.push([mediaValue]);
-                }
-            }
-            else {
-                if (mediaGroups[3]) {
-                    mediaGroups[3].push(mediaValue);
-                }
-                else {
-                    mediaGroups.push([mediaValue]);
-                }
-            }
-            return;
-        });
-        return res.send(mediaGroups);
+                return;
+            });
+            return res.send(mediaGroups);
+        }
     }
+    catch (ex) {
+        return res.status(500).send('call failed');
+    }
+    ;
     return res.send('No data');
 }));
 app.listen(port, () => {

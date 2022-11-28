@@ -1,8 +1,6 @@
 import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
-import axios from 'axios'
 import { MediaGroup } from './interfaces';
-import fetch from "node-fetch";
 
 dotenv.config()
 
@@ -16,7 +14,6 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/send-stories/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params
-  console.log('userId ', userId);
   
   if (!Number(userId)) {
     res.send('invalid')
@@ -26,7 +23,8 @@ app.get('/send-stories/:userId', async (req: Request, res: Response) => {
     // }
     //398693120
   }
-const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`).then(async(response) => (await response.json()).result || undefined);
+  try {
+    const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`).then(async(response:any ) => (await response.json()).result || undefined);
 
     if (userStories && userStories.length !== 0) {
       const mediaGroups: MediaGroup[] = [];
@@ -67,6 +65,9 @@ const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${us
       });
     return res.send(mediaGroups);
     }
+  } catch (ex) {
+      return res.status(500).send('call failed')
+  };
   return res.send('No data');
 });
 
