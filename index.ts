@@ -63,7 +63,7 @@ app.get('/get-user-id/:username', async (req: Request, res: Response)=>{
     const userId = await getUserId(req.params.username);
     return res.send(userId.toString());
   } catch(ex: any){
-    res.status(500).send('Error occured while trying to get user ID');
+    return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
   }
 })
 

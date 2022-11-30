@@ -69,7 +69,7 @@ app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0
         return res.send(userId.toString());
     }
     catch (ex) {
-        res.status(500).send('Error occured while trying to get user ID');
+        return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
     }
 }));
 app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
