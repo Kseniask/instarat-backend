@@ -14,17 +14,62 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const puppeteer_1 = __importDefault(require("puppeteer"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
+const getUserId = (username) => __awaiter(void 0, void 0, void 0, function* () {
+    const browser = yield puppeteer_1.default.launch({ args: ['--no-sandbox'] });
+    const page = yield browser.newPage();
+    yield page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
+    yield page.setRequestInterception(true);
+    let stopRequests = false;
+    page.on('request', (request) => __awaiter(void 0, void 0, void 0, function* () {
+        if (request.url().includes(`https://www.instagram.com/api/v1/lox/account_recommendations`)) {
+            stopRequests = true;
+            return yield request.continue();
+        }
+        if (stopRequests) {
+            return yield request.abort();
+        }
+        yield request.continue();
+    }));
+    yield page.goto(`https://instagram.com/${username}`, { waitUntil: 'load' });
+    // await page.screenshot({ path: 'userId.jpg' });
+    const userId = yield page.evaluate(() => {
+        let foundId = false;
+        let currentIndex = 32;
+        const getIdText = (scriptIndex) => document.scripts[scriptIndex].text.split('"id":"')[1];
+        while (foundId === false && currentIndex < 45) {
+            foundId = getIdText(currentIndex) !== undefined;
+            currentIndex++;
+        }
+        if (foundId) {
+            const userId = getIdText(currentIndex - 1).split('","')[0];
+            return userId;
+        }
+        return 0;
+    });
+    yield browser.close();
+    return userId;
+});
 app.get('/', (req, res) => {
     res.send('Welcome to Instarat backend');
 });
+app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = yield getUserId(req.params.username);
+        res.send(userId.toString());
+    }
+    catch (ex) {
+        res.sendStatus(500).send('Error occured while trying to get user ID');
+    }
+}));
 app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     if (!Number(userId)) {
         res.send('invalid');
-        // userId = await getUserId(instaUsername, context)
+        // userId = await getUserId(instausername, context)
         // if (userId === 0) {
         //   return context.reply('Або акаунт приватний aбо такого юзера не існує..')
         // }
@@ -79,7 +124,7 @@ app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0,
         }
     }
     catch (ex) {
-        return res.status(500).send('call failed');
+        return res.sendStatus(500).send('call failed');
     }
     ;
     return res.send('No data');

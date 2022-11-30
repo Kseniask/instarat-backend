@@ -1,15 +1,65 @@
 import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
 import { MediaGroup } from './interfaces';
+import Puppeteer from 'puppeteer';
 
 dotenv.config()
 
 const app: Express = express()
 const port = process.env.PORT
 
+const getUserId = async (username: string) => {
+  const browser = await Puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.setUserAgent(
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+  );
+  await page.setRequestInterception(true);
+  let stopRequests = false;
+  page.on('request', async (request: any) => {    
+    if (request.url().includes(`https://www.instagram.com/api/v1/lox/account_recommendations`)) {
+      stopRequests = true;
+      return await request.continue();
+    }
+    if (stopRequests) {
+      return await request.abort();
+    }
+    await request.continue();
+  });
+  await page.goto(`https://instagram.com/${username}`, { waitUntil: 'load' });
+  // await page.screenshot({ path: 'userId.jpg' });
+  const userId = await page.evaluate(
+    () => {
+      let foundId = false;
+      let currentIndex = 32;
+      const getIdText = (scriptIndex: number) => document.scripts[scriptIndex].text.split('"id":"')[1];
+      while (foundId === false && currentIndex < 45) {
+        foundId = getIdText(currentIndex) !== undefined;
+        currentIndex++;
+      }
+
+      if (foundId) {
+        const userId = getIdText(currentIndex - 1).split('","')[0];
+        return userId;
+      }
+      return 0;
+    }
+  );
+  await browser.close();
+  return userId;
+};
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to Instarat backend')
+})
+
+app.get('/get-user-id/:username', async (req: Request, res: Response)=>{
+  try {
+    const userId = await getUserId(req.params.username);
+    res.send(userId.toString());
+  } catch(ex: any){
+    res.sendStatus(500).send('Error occured while trying to get user ID');
+  }
 })
 
 app.get('/send-stories/:userId', async (req: Request, res: Response) => {
@@ -17,7 +67,7 @@ app.get('/send-stories/:userId', async (req: Request, res: Response) => {
   
   if (!Number(userId)) {
     res.send('invalid')
-    // userId = await getUserId(instaUsername, context)
+    // userId = await getUserId(instausername, context)
     // if (userId === 0) {
     //   return context.reply('Або акаунт приватний aбо такого юзера не існує..')
     // }
@@ -66,7 +116,7 @@ app.get('/send-stories/:userId', async (req: Request, res: Response) => {
     return res.send(mediaGroups);
     }
   } catch (ex) {
-      return res.status(500).send('call failed')
+      return res.sendStatus(500).send('call failed')
   };
   return res.send('No data');
 });
