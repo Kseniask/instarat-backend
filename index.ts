@@ -9,7 +9,7 @@ const app: Express = express()
 const port = process.env.PORT
 
 const getUserId = async (username: string) => {
-  const browser = await Puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await Puppeteer.launch({ args: ['--no-sandbox'] });
   try {
     const page = await browser.newPage();
     await page.setUserAgent(
@@ -33,7 +33,10 @@ const getUserId = async (username: string) => {
       () => {
         let foundId = false;
         let currentIndex = 20;
-        const getIdText = (scriptIndex: number) => document.scripts[scriptIndex].text.split('"id":"')[1];
+        const getIdText = (scriptIndex: number) => {
+          console.log('checking script #',scriptIndex);
+          
+          return document.scripts[scriptIndex]?.text.split('"id":"')[1];}
         while (foundId === false && currentIndex < 50) {
           foundId = getIdText(currentIndex) !== undefined;
           currentIndex++;

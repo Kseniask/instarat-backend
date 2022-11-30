@@ -19,7 +19,7 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 const getUserId = (username) => __awaiter(void 0, void 0, void 0, function* () {
-    const browser = yield puppeteer_1.default.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = yield puppeteer_1.default.launch({ args: ['--no-sandbox'] });
     try {
         const page = yield browser.newPage();
         yield page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
@@ -40,7 +40,11 @@ const getUserId = (username) => __awaiter(void 0, void 0, void 0, function* () {
         const userId = yield page.evaluate(() => {
             let foundId = false;
             let currentIndex = 20;
-            const getIdText = (scriptIndex) => document.scripts[scriptIndex].text.split('"id":"')[1];
+            const getIdText = (scriptIndex) => {
+                var _a;
+                console.log('checking script #', scriptIndex);
+                return (_a = document.scripts[scriptIndex]) === null || _a === void 0 ? void 0 : _a.text.split('"id":"')[1];
+            };
             while (foundId === false && currentIndex < 50) {
                 foundId = getIdText(currentIndex) !== undefined;
                 currentIndex++;
