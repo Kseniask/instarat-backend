@@ -13,132 +13,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const puppeteer_1 = __importDefault(require("puppeteer"));
-dotenv_1.default.config();
+const telegramHelper_js_1 = require("./helpers/telegramHelper.js");
+const instagramHelper_js_1 = require("./helpers/instagramHelper.js");
+const constants_js_1 = require("./helpers/constants.js");
+require('dotenv').config();
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 const port = process.env.PORT;
-const getUserId = (username) => __awaiter(void 0, void 0, void 0, function* () {
-    const browser = yield puppeteer_1.default.launch({ args: ['--no-sandbox'] });
-    try {
-        const page = yield browser.newPage();
-        yield page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36');
-        yield page.setRequestInterception(true);
-        let stopRequests = false;
-        page.on('request', (request) => __awaiter(void 0, void 0, void 0, function* () {
-            if (request.url().includes(`https://www.instagram.com/api/v1/lox/account_recommendations`)) {
-                stopRequests = true;
-                return yield request.continue();
-            }
-            if (stopRequests) {
-                return yield request.abort();
-            }
-            yield request.continue();
-        }));
-        yield page.goto(`https://instagram.com/${username}`, { waitUntil: 'load' });
-        // await page.screenshot({ path: 'userId.jpg' });
-        const userId = yield page.evaluate(() => {
-            let foundId = false;
-            let currentIndex = 20;
-            const getIdText = (scriptIndex) => {
-                var _a;
-                console.log('checking script #', scriptIndex);
-                return (_a = document.scripts[scriptIndex]) === null || _a === void 0 ? void 0 : _a.text.split('"id":"')[1];
-            };
-            while (foundId === false && currentIndex < 50) {
-                foundId = getIdText(currentIndex) !== undefined;
-                currentIndex++;
-            }
-            if (foundId) {
-                const userId = getIdText(currentIndex - 1).split('","')[0];
-                return userId;
-            }
-            return 0;
-        });
-        return userId;
-    }
-    catch (ex) {
-        throw new Error(`Failed: ${ex}`);
-    }
-    finally {
-        yield browser.close();
-    }
-});
 app.get('/', (req, res) => {
     res.send('Welcome to Instarat backend');
 });
 app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = yield getUserId(req.params.username);
+        const userId = yield (0, instagramHelper_js_1.getUserId)(req.params.username);
         return res.send(userId.toString());
     }
     catch (ex) {
         return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
     }
 }));
-app.get('/send-stories/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
-    if (!Number(userId)) {
-        res.send('invalid');
-        // userId = await getUserId(instausername, context)
-        // if (userId === 0) {
-        //   return context.reply('Або акаунт приватний aбо такого юзера не існує..')
-        // }
-        //398693120
-    }
+app.post('/send-stories/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { chatId, text } = req.body;
+    const userId = text;
+    yield (0, telegramHelper_js_1.sendMessage)(chatId, `Getting stories for ${userId}`);
     try {
-        const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`).then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }));
-        if (userStories && userStories.length !== 0) {
-            const mediaGroups = [];
-            userStories.forEach((story, index) => {
-                const isVideo = story.video_versions;
-                const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
-                const mediaValue = {
-                    type: isVideo ? 'video' : 'photo',
-                    media: storyUrl
-                };
-                if (index < 9) {
-                    if (mediaGroups[0]) {
-                        mediaGroups[0].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                else if (index < 19) {
-                    if (mediaGroups[1]) {
-                        mediaGroups[1].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                else if (index < 29) {
-                    if (mediaGroups[2]) {
-                        mediaGroups[2].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                else {
-                    if (mediaGroups[3]) {
-                        mediaGroups[3].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                return;
-            });
-            return res.send(mediaGroups);
+        if (parseInt(userId)) {
+            yield (0, instagramHelper_js_1.sendUserMedia)(userId, chatId);
+        }
+        else if (text[0] === '@') {
+            yield (0, telegramHelper_js_1.sendMessage)(chatId, constants_js_1.ErrorMessages.NOT_IMPLEMENTED);
+            return res.status(500).send(constants_js_1.ErrorMessages.NOT_IMPLEMENTED);
+        }
+        else {
+            yield (0, telegramHelper_js_1.sendMessage)(chatId, constants_js_1.ErrorMessages.INVALID_USERNAME);
+            return res.status(500).send(constants_js_1.ErrorMessages.INVALID_USERNAME);
         }
     }
     catch (ex) {
-        return res.sendStatus(500).send('call failed');
+        return res.status(500).send(`${constants_js_1.ErrorMessages.FAILED_CALL_ERROR_MESSAGE} ${ex}`);
     }
-    ;
-    return res.send('No data');
+    return res.sendStatus(200);
 }));
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
