@@ -32,7 +32,7 @@ app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0
         return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
     }
 }));
-app.post('/send-stories/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/send-stories', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { chatId, text } = req.body;
     const userId = text;
     yield (0, telegramHelper_js_1.sendMessage)(chatId, `Getting stories for ${userId}`);

@@ -21,7 +21,7 @@ app.get('/get-user-id/:username', async (req: Request, res: Response)=>{
   }
 })
 
-app.post('/send-stories/', async (req: Request, res: Response) => {
+app.post('/send-stories', async (req: Request, res: Response) => {
   const { chatId, text } = req.body
   const userId = text;
   await sendMessage( chatId, `Getting stories for ${userId}`)
