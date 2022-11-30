@@ -9,7 +9,7 @@ const app: Express = express()
 const port = process.env.PORT
 
 const getUserId = async (username: string) => {
-  const browser = await Puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await Puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   try {
     const page = await browser.newPage();
     await page.setUserAgent(
