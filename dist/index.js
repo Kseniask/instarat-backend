@@ -23,11 +23,13 @@ const port = process.env.PORT;
 app.get('/', (req, res) => {
     res.send('Welcome to Instarat backend');
 });
-app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/send-user-id/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { chatId, text } = req.body;
     try {
         console.log(`Getting user id for ${req.params.username}`);
+        yield (0, telegramHelper_js_1.sendMessage)(chatId, `Getting user id for ${text}`);
         const userId = yield (0, instagramHelper_js_1.getUserId)(req.params.username);
-        console.log(`user Id is: ${userId}`);
+        yield (0, telegramHelper_js_1.sendMessage)(chatId, `User id of @${text}: ${userId}`);
         res.send(userId.toString());
     }
     catch (ex) {

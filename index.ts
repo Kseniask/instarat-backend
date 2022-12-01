@@ -12,11 +12,13 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to Instarat backend')
 })
 
-app.get('/get-user-id/:username', async (req: Request, res: Response)=>{
+app.post('/send-user-id/', async (req: Request, res: Response) => {
+  const { chatId, text } = req.body;
   try {
     console.log(`Getting user id for ${req.params.username}`)
+    await sendMessage(chatId, `Getting user id for ${text}`)
     const userId = await getUserId(req.params.username);
-    console.log(`user Id is: ${userId}` );
+    await sendMessage( chatId, `User id of @${text}: ${userId}`)
     res.send(userId.toString());
   } catch(ex: any){
     res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
