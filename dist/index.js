@@ -25,11 +25,13 @@ app.get('/', (req, res) => {
 });
 app.get('/get-user-id/:username', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log(`Getting user id for ${req.params.username}`);
         const userId = yield (0, instagramHelper_js_1.getUserId)(req.params.username);
-        return res.send(userId.toString());
+        console.log(`user Id is: ${userId}`);
+        res.send(userId.toString());
     }
     catch (ex) {
-        return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
+        res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
     }
 }));
 app.post('/send-stories', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,10 +44,12 @@ app.post('/send-stories', (req, res) => __awaiter(void 0, void 0, void 0, functi
         }
         else if (text[0] === '@') {
             yield (0, telegramHelper_js_1.sendMessage)(chatId, constants_js_1.ErrorMessages.NOT_IMPLEMENTED);
+            console.log(`${constants_js_1.ErrorMessages.NOT_IMPLEMENTED}. Searching ${text}`);
             return res.status(500).send(constants_js_1.ErrorMessages.NOT_IMPLEMENTED);
         }
         else {
             yield (0, telegramHelper_js_1.sendMessage)(chatId, constants_js_1.ErrorMessages.INVALID_USERNAME);
+            console.log(`${constants_js_1.ErrorMessages.INVALID_USERNAME}. Searching ${text}`);
             return res.status(500).send(constants_js_1.ErrorMessages.INVALID_USERNAME);
         }
     }

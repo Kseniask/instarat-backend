@@ -14,10 +14,12 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/get-user-id/:username', async (req: Request, res: Response)=>{
   try {
+    console.log(`Getting user id for ${req.params.username}`)
     const userId = await getUserId(req.params.username);
-    return res.send(userId.toString());
+    console.log(`user Id is: ${userId}` );
+    res.send(userId.toString());
   } catch(ex: any){
-    return res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
+    res.status(500).send(`Error occured while trying to get user ID: ${ex}`);
   }
 })
 
@@ -31,6 +33,7 @@ app.post('/send-stories', async (req: Request, res: Response) => {
     } 
     else if (text[0] === '@') {
       await sendMessage( chatId, ErrorMessages.NOT_IMPLEMENTED);
+      console.log(`${ErrorMessages.NOT_IMPLEMENTED}. Searching ${text}`);
       return res.status(500).send(ErrorMessages.NOT_IMPLEMENTED);
     } 
     else {
@@ -38,6 +41,7 @@ app.post('/send-stories', async (req: Request, res: Response) => {
         chatId,
         ErrorMessages.INVALID_USERNAME
       )
+      console.log(`${ErrorMessages.INVALID_USERNAME}. Searching ${text}`);
       return res.status(500).send(ErrorMessages.INVALID_USERNAME);
     }
   } catch (ex) {
