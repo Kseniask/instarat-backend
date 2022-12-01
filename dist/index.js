@@ -26,9 +26,9 @@ app.get('/', (req, res) => {
 app.post('/send-user-id/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { chatId, text } = req.body;
     try {
-        console.log(`Getting user id for ${req.params.username}`);
+        console.log(`Getting user id for ${text}`);
         yield (0, telegramHelper_js_1.sendMessage)(chatId, `Getting user id for ${text}`);
-        const userId = yield (0, instagramHelper_js_1.getUserId)(req.params.username);
+        const userId = yield (0, instagramHelper_js_1.getUserId)(text);
         yield (0, telegramHelper_js_1.sendMessage)(chatId, `User id of @${text}: ${userId}`);
         res.send(userId.toString());
     }
