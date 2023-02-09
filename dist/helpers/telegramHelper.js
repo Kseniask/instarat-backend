@@ -16,7 +16,7 @@ const sendMessage = (chatId, message) => __awaiter(void 0, void 0, void 0, funct
 exports.sendMessage = sendMessage;
 function sendPhoto(chatId, photoUrl) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield fetch(`/bot${process.env.API_KEY}/sendPhoto`, {
+        yield fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ function sendPhoto(chatId, photoUrl) {
                 chat_id: Number(chatId),
                 photo: photoUrl
             })
-        }).then(resp => resp.json());
+        }).then(resp => resp.json()).catch((error) => (0, exports.sendMessage)(chatId, error));
     });
 }
 exports.sendPhoto = sendPhoto;
@@ -40,7 +40,7 @@ function sendVideo(chatId, videoUrl) {
                 chat_id: Number(chatId),
                 video: videoUrl
             })
-        }).then(resp => resp.json());
+        }).then(resp => resp.json()).catch((error) => (0, exports.sendMessage)(chatId, error));
     });
 }
 exports.sendVideo = sendVideo;
@@ -55,7 +55,7 @@ function sendMediaGroup(chatId, arrayOfMedia) {
                 chat_id: Number(chatId),
                 media: arrayOfMedia
             })
-        });
+        }).catch((error) => (0, exports.sendMessage)(chatId, error));
     });
 }
 exports.sendMediaGroup = sendMediaGroup;

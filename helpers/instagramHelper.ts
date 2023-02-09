@@ -61,25 +61,26 @@ export const getMediaGroups = async (userId: string) => {
 
 export const sendUserMedia = async(userId: string, chatId: string ) => {
     const mediaGroups = await getMediaGroups(userId);
-    
+
     if(mediaGroups === undefined) {
         return await sendMessage( chatId, 'Пусто');
     }
-    mediaGroups.forEach(async mediaGroup => {
+    await Promise.all(mediaGroups.map(async mediaGroup => {      
         if (mediaGroup.length > 0) {
             if (mediaGroup.length === 1) {
-            switch (mediaGroup[0].type) {
-                case 'photo':
-                    await sendPhoto( chatId, mediaGroup[0].media);
-                    break;
-                case 'video':
-                    await sendVideo(chatId, mediaGroup[0].media);
-            }
+              switch (mediaGroup[0].type) {
+                  case 'photo':
+                      await sendPhoto( chatId, mediaGroup[0].media);
+                      break;
+                  case 'video':
+                      await sendVideo(chatId, mediaGroup[0].media);
+              }
             } else {
-                await sendMediaGroup(chatId, mediaGroup);
+                await sendMediaGroup(chatId, mediaGroup.filter(media=> media.type == 'photo'));
+                await sendMediaGroup(chatId, mediaGroup.filter(media=> media.type == 'video'));
             }
         }
-    })
+    }))
 }
 
 export const getUserId = async (username: string) => {

@@ -7,7 +7,8 @@ export const sendMessage = async (chatId: string, message: string) => {
 }
 
 export async function sendPhoto (chatId: string, photoUrl: string) {
-  await fetch(`/bot${process.env.API_KEY}/sendPhoto`, {
+
+  await fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -16,7 +17,7 @@ export async function sendPhoto (chatId: string, photoUrl: string) {
       chat_id: Number(chatId),
       photo: photoUrl
     })
-  }).then(resp => resp.json())
+  }).then(resp => resp.json()).catch((error) => sendMessage(chatId, error))
 }
 
 export async function sendVideo (chatId: string, videoUrl: string) {
@@ -29,7 +30,7 @@ export async function sendVideo (chatId: string, videoUrl: string) {
       chat_id: Number(chatId),
       video: videoUrl
     })
-  }).then(resp => resp.json())
+  }).then(resp => resp.json()).catch((error) => sendMessage(chatId, error))
 }
 
 export async function sendMediaGroup (chatId: string, arrayOfMedia: MediaGroup) {
@@ -42,5 +43,5 @@ export async function sendMediaGroup (chatId: string, arrayOfMedia: MediaGroup) 
       chat_id: Number(chatId),
       media: arrayOfMedia
     })
-  })
+  }).catch((error) => sendMessage(chatId, error))
 }

@@ -84,7 +84,7 @@ const sendUserMedia = (userId, chatId) => __awaiter(void 0, void 0, void 0, func
     if (mediaGroups === undefined) {
         return yield (0, telegramHelper_1.sendMessage)(chatId, 'Пусто');
     }
-    mediaGroups.forEach((mediaGroup) => __awaiter(void 0, void 0, void 0, function* () {
+    yield Promise.all(mediaGroups.map((mediaGroup) => __awaiter(void 0, void 0, void 0, function* () {
         if (mediaGroup.length > 0) {
             if (mediaGroup.length === 1) {
                 switch (mediaGroup[0].type) {
@@ -96,10 +96,11 @@ const sendUserMedia = (userId, chatId) => __awaiter(void 0, void 0, void 0, func
                 }
             }
             else {
-                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup);
+                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter(media => media.type == 'photo'));
+                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter(media => media.type == 'video'));
             }
         }
-    }));
+    })));
 });
 exports.sendUserMedia = sendUserMedia;
 const getUserId = (username) => __awaiter(void 0, void 0, void 0, function* () {
