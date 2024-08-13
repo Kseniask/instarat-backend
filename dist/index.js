@@ -37,6 +37,7 @@ app.post('/send-user-id/', (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 }));
 app.post('/send-stories', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('req.body', req.body);
     const { chatId, text } = req.body;
     const userId = text;
     yield (0, telegramHelper_js_1.sendMessage)(chatId, `Getting stories for ${userId}`);

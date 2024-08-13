@@ -33,8 +33,8 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
                 const isVideo = story.video_versions;
                 const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
                 const mediaValue = {
-                    type: isVideo ? 'video' : 'photo',
-                    media: storyUrl
+                    type: (isVideo === null || isVideo === void 0 ? void 0 : isVideo.length) > 0 ? 'video' : 'photo',
+                    media: storyUrl,
                 };
                 if (index < 9) {
                     if (mediaGroups[0]) {
@@ -76,7 +76,6 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
     catch (ex) {
         throw Error(`Getting media failed: ${ex}`);
     }
-    ;
 });
 exports.getMediaGroups = getMediaGroups;
 const sendUserMedia = (userId, chatId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -96,8 +95,8 @@ const sendUserMedia = (userId, chatId) => __awaiter(void 0, void 0, void 0, func
                 }
             }
             else {
-                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter(media => media.type == 'photo'));
-                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter(media => media.type == 'video'));
+                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter((media) => media.type == 'photo'));
+                yield (0, telegramHelper_1.sendMediaGroup)(chatId, mediaGroup.filter((media) => media.type == 'video'));
             }
         }
     })));
