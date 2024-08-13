@@ -13,9 +13,9 @@ export const getMediaGroups = async (userId: string) => {
     //398693120
   }
   try {
-    const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`).then(
-      async (response: any) => (await response.json()).result || undefined,
-    );
+    const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`)
+      .then(async (response: any) => (await response.json()).result || undefined)
+      .catch((e) => console.log('Error occured while trying to get stories: ', e));
     console.log('userStories: ', userStories);
 
     if (userStories && userStories.length !== 0) {

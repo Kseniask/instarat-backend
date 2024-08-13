@@ -26,7 +26,9 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
         //398693120
     }
     try {
-        const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`).then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }));
+        const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`)
+            .then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }))
+            .catch((e) => console.log('Error occured while trying to get stories: ', e));
         console.log('userStories: ', userStories);
         if (userStories && userStories.length !== 0) {
             const mediaGroups = [];
