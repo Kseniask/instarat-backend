@@ -8,54 +8,66 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMediaGroup = exports.sendVideo = exports.sendPhoto = exports.sendMessage = void 0;
+const axios_1 = __importDefault(require("axios"));
 const sendMessage = (chatId, message) => __awaiter(void 0, void 0, void 0, function* () {
-    yield fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMessage?chat_id=${chatId}&text=${message}`).then(resp => resp.json());
+    yield axios_1.default
+        .get(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMessage?chat_id=${chatId}&text=${message}`)
+        .then((resp) => resp.data);
 });
 exports.sendMessage = sendMessage;
 function sendPhoto(chatId, photoUrl) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`, {
-            method: 'POST',
+        yield axios_1.default
+            .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`, {
+            chat_id: Number(chatId),
+            photo: photoUrl,
+        }, {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                chat_id: Number(chatId),
-                photo: photoUrl
-            })
-        }).then(resp => resp.json()).catch((error) => (0, exports.sendMessage)(chatId, error));
+        })
+            .then((response) => {
+            console.log(response.data);
+        })
+            .catch((error) => {
+            (0, exports.sendMessage)(chatId, error);
+        });
     });
 }
 exports.sendPhoto = sendPhoto;
 function sendVideo(chatId, videoUrl) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendVideo`, {
-            method: 'POST',
+        yield axios_1.default
+            .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendVideo`, {
+            chat_id: Number(chatId),
+            video: videoUrl,
+        }, {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                chat_id: Number(chatId),
-                video: videoUrl
-            })
-        }).then(resp => resp.json()).catch((error) => (0, exports.sendMessage)(chatId, error));
+        })
+            .then((resp) => resp.data)
+            .catch((error) => (0, exports.sendMessage)(chatId, error));
     });
 }
 exports.sendVideo = sendVideo;
 function sendMediaGroup(chatId, arrayOfMedia) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield fetch(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMediaGroup`, {
-            method: 'POST',
+        yield axios_1.default
+            .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMediaGroup`, {
+            chat_id: Number(chatId),
+            media: arrayOfMedia,
+        }, {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                chat_id: Number(chatId),
-                media: arrayOfMedia
-            })
-        }).catch((error) => (0, exports.sendMessage)(chatId, error));
+        })
+            .catch((error) => (0, exports.sendMessage)(chatId, error));
     });
 }
 exports.sendMediaGroup = sendMediaGroup;

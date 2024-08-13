@@ -16,7 +16,9 @@ exports.getUserId = exports.sendUserMedia = exports.getMediaGroups = void 0;
 const constants_1 = require("./constants");
 const telegramHelper_1 = require("./telegramHelper");
 const puppeteer_1 = __importDefault(require("puppeteer"));
+const axios_1 = __importDefault(require("axios"));
 const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    var hasError = false;
     if (!Number(userId)) {
         throw Error(constants_1.ErrorMessages.INVALID_USER_ID_ERROR_MESSAGE);
         // userId = await getUserId(instausername, context)
@@ -25,65 +27,73 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
         // }
         //398693120
     }
-    try {
-        const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`, { method: 'GET' })
-            .then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }))
-            .catch((e) => console.log('Error occured while trying to get stories: ', e));
-        console.log('userStories: ', userStories);
-        if (userStories && userStories.length !== 0) {
-            const mediaGroups = [];
-            userStories.forEach((story, index) => {
-                const isVideo = story.video_versions;
-                const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
-                const mediaValue = {
-                    type: (isVideo === null || isVideo === void 0 ? void 0 : isVideo.length) > 0 ? 'video' : 'photo',
-                    media: storyUrl,
-                };
-                if (index < 9) {
-                    if (mediaGroups[0]) {
-                        mediaGroups[0].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                else if (index < 19) {
-                    if (mediaGroups[1]) {
-                        mediaGroups[1].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
-                }
-                else if (index < 29) {
-                    if (mediaGroups[2]) {
-                        mediaGroups[2].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
+    const userStories = yield axios_1.default
+        .get(`https://storiesig.info/api/ig/stories/${userId}`)
+        .then((response) => {
+        console.log('response: ', response);
+        return response.data.result || undefined;
+    })
+        .catch((e) => {
+        console.log('Error occured while trying to get stories: ', e);
+        hasError = true;
+    });
+    console.log('userStories: ', userStories);
+    if (hasError) {
+        return undefined;
+    }
+    if (userStories && userStories.length !== 0) {
+        const mediaGroups = [];
+        userStories.forEach((story, index) => {
+            const isVideo = story.video_versions;
+            const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
+            const mediaValue = {
+                type: (isVideo === null || isVideo === void 0 ? void 0 : isVideo.length) > 0 ? 'video' : 'photo',
+                media: storyUrl,
+            };
+            if (index < 9) {
+                if (mediaGroups[0]) {
+                    mediaGroups[0].push(mediaValue);
                 }
                 else {
-                    if (mediaGroups[3]) {
-                        mediaGroups[3].push(mediaValue);
-                    }
-                    else {
-                        mediaGroups.push([mediaValue]);
-                    }
+                    mediaGroups.push([mediaValue]);
                 }
-                return;
-            });
-            return mediaGroups;
-        }
-    }
-    catch (ex) {
-        throw Error(`Getting media failed: ${ex}`);
+            }
+            else if (index < 19) {
+                if (mediaGroups[1]) {
+                    mediaGroups[1].push(mediaValue);
+                }
+                else {
+                    mediaGroups.push([mediaValue]);
+                }
+            }
+            else if (index < 29) {
+                if (mediaGroups[2]) {
+                    mediaGroups[2].push(mediaValue);
+                }
+                else {
+                    mediaGroups.push([mediaValue]);
+                }
+            }
+            else {
+                if (mediaGroups[3]) {
+                    mediaGroups[3].push(mediaValue);
+                }
+                else {
+                    mediaGroups.push([mediaValue]);
+                }
+            }
+            return [];
+        });
+        return mediaGroups;
     }
 });
 exports.getMediaGroups = getMediaGroups;
 const sendUserMedia = (userId, chatId) => __awaiter(void 0, void 0, void 0, function* () {
     const mediaGroups = yield (0, exports.getMediaGroups)(userId);
     if (mediaGroups === undefined) {
+        return yield (0, telegramHelper_1.sendMessage)(chatId, 'Упс.. Сталася помилка');
+    }
+    if (mediaGroups.length === 0) {
         return yield (0, telegramHelper_1.sendMessage)(chatId, 'Пусто');
     }
     yield Promise.all(mediaGroups.map((mediaGroup) => __awaiter(void 0, void 0, void 0, function* () {

@@ -2,8 +2,10 @@ import { MediaGroup } from './interfaces';
 import { ErrorMessages } from './constants';
 import { sendMediaGroup, sendMessage, sendPhoto, sendVideo } from './telegramHelper';
 import Puppeteer from 'puppeteer';
+import axios from 'axios';
 
 export const getMediaGroups = async (userId: string) => {
+  var hasError = false;
   if (!Number(userId)) {
     throw Error(ErrorMessages.INVALID_USER_ID_ERROR_MESSAGE);
     // userId = await getUserId(instausername, context)
@@ -12,53 +14,61 @@ export const getMediaGroups = async (userId: string) => {
     // }
     //398693120
   }
-  try {
-    const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`, { method: 'GET' })
-      .then(async (response: any) => (await response.json()).result || undefined)
-      .catch((e) => console.log('Error occured while trying to get stories: ', e));
-    console.log('userStories: ', userStories);
+  const userStories: any = await axios
+    .get(`https://storiesig.info/api/ig/stories/${userId}`)
+    .then((response: any) => {
+      console.log('response: ', response);
 
-    if (userStories && userStories.length !== 0) {
-      const mediaGroups: MediaGroup[] = [];
-      userStories.forEach((story: any, index: number) => {
-        const isVideo = story.video_versions;
-        const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
+      return response.data.result || undefined;
+    })
+    .catch((e) => {
+      console.log('Error occured while trying to get stories: ', e);
+      hasError = true;
+    });
+  console.log('userStories: ', userStories);
 
-        const mediaValue = {
-          type: isVideo?.length > 0 ? 'video' : 'photo',
-          media: storyUrl,
-        };
-        if (index < 9) {
-          if (mediaGroups[0]) {
-            mediaGroups[0].push(mediaValue);
-          } else {
-            mediaGroups.push([mediaValue]);
-          }
-        } else if (index < 19) {
-          if (mediaGroups[1]) {
-            mediaGroups[1].push(mediaValue);
-          } else {
-            mediaGroups.push([mediaValue]);
-          }
-        } else if (index < 29) {
-          if (mediaGroups[2]) {
-            mediaGroups[2].push(mediaValue);
-          } else {
-            mediaGroups.push([mediaValue]);
-          }
+  if (hasError) {
+    return undefined;
+  }
+
+  if (userStories && userStories.length !== 0) {
+    const mediaGroups: MediaGroup[] = [];
+    userStories.forEach((story: any, index: number) => {
+      const isVideo = story.video_versions;
+      const storyUrl = isVideo ? story.video_versions[0].url : story.image_versions2.candidates[1].url;
+
+      const mediaValue = {
+        type: isVideo?.length > 0 ? 'video' : 'photo',
+        media: storyUrl,
+      };
+      if (index < 9) {
+        if (mediaGroups[0]) {
+          mediaGroups[0].push(mediaValue);
         } else {
-          if (mediaGroups[3]) {
-            mediaGroups[3].push(mediaValue);
-          } else {
-            mediaGroups.push([mediaValue]);
-          }
+          mediaGroups.push([mediaValue]);
         }
-        return;
-      });
-      return mediaGroups;
-    }
-  } catch (ex) {
-    throw Error(`Getting media failed: ${ex}`);
+      } else if (index < 19) {
+        if (mediaGroups[1]) {
+          mediaGroups[1].push(mediaValue);
+        } else {
+          mediaGroups.push([mediaValue]);
+        }
+      } else if (index < 29) {
+        if (mediaGroups[2]) {
+          mediaGroups[2].push(mediaValue);
+        } else {
+          mediaGroups.push([mediaValue]);
+        }
+      } else {
+        if (mediaGroups[3]) {
+          mediaGroups[3].push(mediaValue);
+        } else {
+          mediaGroups.push([mediaValue]);
+        }
+      }
+      return [];
+    });
+    return mediaGroups;
   }
 };
 
@@ -66,8 +76,13 @@ export const sendUserMedia = async (userId: string, chatId: string) => {
   const mediaGroups = await getMediaGroups(userId);
 
   if (mediaGroups === undefined) {
+    return await sendMessage(chatId, 'Упс.. Сталася помилка');
+  }
+
+  if (mediaGroups.length === 0) {
     return await sendMessage(chatId, 'Пусто');
   }
+
   await Promise.all(
     mediaGroups.map(async (mediaGroup) => {
       if (mediaGroup.length > 0) {
