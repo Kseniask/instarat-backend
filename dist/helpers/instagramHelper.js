@@ -27,6 +27,7 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
     }
     try {
         const userStories = yield fetch(`https://storiesig.info/api/ig/stories/${userId}`).then((response) => __awaiter(void 0, void 0, void 0, function* () { return (yield response.json()).result || undefined; }));
+        console.log('userStories: ', userStories);
         if (userStories && userStories.length !== 0) {
             const mediaGroups = [];
             userStories.forEach((story, index) => {

@@ -16,6 +16,7 @@ export const getMediaGroups = async (userId: string) => {
     const userStories: any = await fetch(`https://storiesig.info/api/ig/stories/${userId}`).then(
       async (response: any) => (await response.json()).result || undefined,
     );
+    console.log('userStories: ', userStories);
 
     if (userStories && userStories.length !== 0) {
       const mediaGroups: MediaGroup[] = [];
