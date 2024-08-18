@@ -17,13 +17,17 @@ const constants_1 = require("./constants");
 const telegramHelper_1 = require("./telegramHelper");
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const axios_1 = __importDefault(require("axios"));
-const axiosInstance = axios_1.default.create({
-    headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-    },
+const getCookies = () => __awaiter(void 0, void 0, void 0, function* () {
+    const browser = yield puppeteer_1.default.launch({ args: ['--no-sandbox'] });
+    const page = yield browser.newPage();
+    yield page.goto('https://storiesig.info', { waitUntil: 'load' });
+    const cookies = yield page.cookies();
+    yield browser.close();
+    return cookies;
 });
 const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const cookies = yield getCookies();
+    console.log('cookies: ', cookies);
     var hasError = false;
     if (!Number(userId)) {
         throw Error(constants_1.ErrorMessages.INVALID_USER_ID_ERROR_MESSAGE);
@@ -33,6 +37,13 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
         // }
         //398693120
     }
+    const axiosInstance = axios_1.default.create({
+        headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            Cookie: cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; '),
+        },
+    });
     const userStories = yield axiosInstance
         .get(`https://storiesig.info/api/ig/stories/${userId}`)
         .then((response) => {

@@ -4,15 +4,19 @@ import { sendMediaGroup, sendMessage, sendPhoto, sendVideo } from './telegramHel
 import Puppeteer from 'puppeteer';
 import axios from 'axios';
 
-const axiosInstance = axios.create({
-  headers: {
-    'Content-Type': 'application/json',
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-  },
-});
+const getCookies = async () => {
+  const browser = await Puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  await page.goto('https://storiesig.info', { waitUntil: 'load' });
+  const cookies = await page.cookies();
+  await browser.close();
+  return cookies;
+};
 
 export const getMediaGroups = async (userId: string) => {
+  const cookies = await getCookies();
+  console.log('cookies: ', cookies);
+
   var hasError = false;
   if (!Number(userId)) {
     throw Error(ErrorMessages.INVALID_USER_ID_ERROR_MESSAGE);
@@ -22,6 +26,15 @@ export const getMediaGroups = async (userId: string) => {
     // }
     //398693120
   }
+  const axiosInstance = axios.create({
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+      Cookie: cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; '),
+    },
+  });
+
   const userStories: any = await axiosInstance
     .get(`https://storiesig.info/api/ig/stories/${userId}`)
     .then((response: any) => {
