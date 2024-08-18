@@ -1,14 +1,20 @@
 import axios from 'axios';
 import { MediaGroup } from './interfaces';
 
+const axiosInstance = axios.create({
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 export const sendMessage = async (chatId: string, message: string) => {
-  await axios
+  await axiosInstance
     .get(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMessage?chat_id=${chatId}&text=${message}`)
     .then((resp) => resp.data);
 };
 
 export async function sendPhoto(chatId: string, photoUrl: string) {
-  await axios
+  await axiosInstance
     .post(
       `${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`,
       {
@@ -30,7 +36,7 @@ export async function sendPhoto(chatId: string, photoUrl: string) {
 }
 
 export async function sendVideo(chatId: string, videoUrl: string) {
-  await axios
+  await axiosInstance
     .post(
       `${process.env.BASE_URL}/bot${process.env.API_KEY}/sendVideo`,
       {
@@ -48,7 +54,7 @@ export async function sendVideo(chatId: string, videoUrl: string) {
 }
 
 export async function sendMediaGroup(chatId: string, arrayOfMedia: MediaGroup) {
-  await axios
+  await axiosInstance
     .post(
       `${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMediaGroup`,
       {

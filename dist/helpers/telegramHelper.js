@@ -14,15 +14,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMediaGroup = exports.sendVideo = exports.sendPhoto = exports.sendMessage = void 0;
 const axios_1 = __importDefault(require("axios"));
+const axiosInstance = axios_1.default.create({
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 const sendMessage = (chatId, message) => __awaiter(void 0, void 0, void 0, function* () {
-    yield axios_1.default
+    yield axiosInstance
         .get(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMessage?chat_id=${chatId}&text=${message}`)
         .then((resp) => resp.data);
 });
 exports.sendMessage = sendMessage;
 function sendPhoto(chatId, photoUrl) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield axios_1.default
+        yield axiosInstance
             .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendPhoto`, {
             chat_id: Number(chatId),
             photo: photoUrl,
@@ -42,7 +47,7 @@ function sendPhoto(chatId, photoUrl) {
 exports.sendPhoto = sendPhoto;
 function sendVideo(chatId, videoUrl) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield axios_1.default
+        yield axiosInstance
             .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendVideo`, {
             chat_id: Number(chatId),
             video: videoUrl,
@@ -58,7 +63,7 @@ function sendVideo(chatId, videoUrl) {
 exports.sendVideo = sendVideo;
 function sendMediaGroup(chatId, arrayOfMedia) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield axios_1.default
+        yield axiosInstance
             .post(`${process.env.BASE_URL}/bot${process.env.API_KEY}/sendMediaGroup`, {
             chat_id: Number(chatId),
             media: arrayOfMedia,

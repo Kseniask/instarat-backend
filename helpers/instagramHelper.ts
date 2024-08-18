@@ -4,6 +4,12 @@ import { sendMediaGroup, sendMessage, sendPhoto, sendVideo } from './telegramHel
 import Puppeteer from 'puppeteer';
 import axios from 'axios';
 
+const axiosInstance = axios.create({
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 export const getMediaGroups = async (userId: string) => {
   var hasError = false;
   if (!Number(userId)) {
@@ -14,7 +20,7 @@ export const getMediaGroups = async (userId: string) => {
     // }
     //398693120
   }
-  const userStories: any = await axios
+  const userStories: any = await axiosInstance
     .get(`https://storiesig.info/api/ig/stories/${userId}`)
     .then((response: any) => {
       console.log('response: ', response);

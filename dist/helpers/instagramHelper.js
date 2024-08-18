@@ -17,6 +17,11 @@ const constants_1 = require("./constants");
 const telegramHelper_1 = require("./telegramHelper");
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const axios_1 = __importDefault(require("axios"));
+const axiosInstance = axios_1.default.create({
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     var hasError = false;
     if (!Number(userId)) {
@@ -27,7 +32,7 @@ const getMediaGroups = (userId) => __awaiter(void 0, void 0, void 0, function* (
         // }
         //398693120
     }
-    const userStories = yield axios_1.default
+    const userStories = yield axiosInstance
         .get(`https://storiesig.info/api/ig/stories/${userId}`)
         .then((response) => {
         console.log('response: ', response);
